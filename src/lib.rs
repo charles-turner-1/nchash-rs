@@ -5,6 +5,8 @@ use std::string;
 use std::fs;
 use std::time::SystemTime;
 
+use crate::nchdr::nchdr;
+
 use pyo3::{exceptions::PyException, prelude::*};
 
 /// Formats the sum of two numbers as string.
@@ -103,8 +105,11 @@ impl NCDataHash {
         Some(mtime)
     }
 
-    fn getheader(&self) -> () {
+    fn getheader(&self) -> String {
         // Call ncdump -h here (nchdr maybe?) 
+        let header_str = nchdr(self.filename.clone()).unwrap();
+        // unwrap -- eugh
+        header_str
 
     }
 

@@ -1,5 +1,5 @@
 
-pub fn get_dim_info(file: &netcdf::File, dim_name: &String) {
+pub fn fmt_dim_info(file: &netcdf::File, dim_name: &String) -> String {
     // Take references to a file and a dimension in it, and print their size.
 
     let dim_opt = file.dimensions().find(|dim| dim.name() == *dim_name);
@@ -14,7 +14,7 @@ pub fn get_dim_info(file: &netcdf::File, dim_name: &String) {
 
     let dim_fstr = format_dim_info(dim_info);
 
-    println!("{}", dim_fstr)
+    format!("{}\n", dim_fstr)
 }
 
 struct DimInfo {

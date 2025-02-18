@@ -2,13 +2,14 @@ mod attrs;
 mod dims;
 mod vars;
 
-use attrs::get_attr_info;
-use dims::get_dim_info;
 use netcdf::{self};
 use std::env;
 use std::error::Error;
 use std::path::Path;
-use vars::get_var_info;
+
+use attrs::fmt_attr_info;
+use dims::fmt_dim_info;
+use vars::fmt_var_info;
 
 pub fn nchdr(fname: String) -> Result<String, Box<dyn Error>> {
     // Dynamically build back up the output of ncdump -h $fname
@@ -20,38 +21,40 @@ pub fn nchdr(fname: String) -> Result<String, Box<dyn Error>> {
     let file: netcdf::File = netcdf::open(f_path)?;
 
     let file_stem = extract_fname(&f_path)?;
-    let preamble =  print_skeleton_opening(&file_stem);
+    ncdump.push_str(&fmt_skeleton_opening(&file_stem));
+    
 
     let variables: Vec<_> = file.variables().collect();
     let dimensions: Vec<_> = file.dimensions().collect();
     let global_attrs: Vec<_> = file.attributes().collect();
 
-    println!("{}", "dimensions:");
+    ncdump.push_str(&format!("{}", "dimensions:"));
     for dim in dimensions {
-        get_dim_info(&file, &dim.name());
+        ncdump.push_str(&fmt_dim_info(&file, &dim.name()));
     }
 
-    println!("{}", "variables:");
+    ncdump.push_str(&format!("{}", "variables:"));
     for var in variables {
-        get_var_info(&file, &var.name());
+        ncdump.push_str(&fmt_var_info(&file, &var.name()));
     }
 
-    println!("{}", "\n// global attributes:");
+    ncdump.push_str(&format!("{}", "\n// global attributes:"));
     for attr in global_attrs {
-        get_attr_info(&file, attr.name())
+        ncdump.push_str(&fmt_attr_info(&file, attr.name()));
     }
-    print_skeleton_close();
+    
+    ncdump.push_str(&fmt_skeleton_close());
 
-    Ok("lalala".to_string())
+    Ok(ncdump)
 }
 
-fn print_skeleton_opening(f_stem: &str) -> String {
-    format!("netcdf {} {{ ", f_stem).to_string()
+fn fmt_skeleton_opening(f_stem: &str) -> String {
+    format!("netcdf {} {{\n", f_stem).to_string()
 
 }
 
-fn print_skeleton_close() -> String { 
-    "}}\n".to_string()
+fn fmt_skeleton_close() -> String { 
+    "}\n".to_string()
 }
 
 fn extract_fname<'a>(f_handle: &'a std::path::Path) -> Result<&str, &str> {

@@ -1,7 +1,7 @@
 use crate::nchdr::attrs::format_attr;
 use netcdf::{self, types::NcVariableType};
 
-pub fn get_var_info(file: &netcdf::File, var_name: &String) {
+pub fn fmt_var_info(file: &netcdf::File, var_name: &String) -> String {
     // Take reference to a file and a variable in it, and get all the attributes
     // and their values
 
@@ -17,20 +17,16 @@ pub fn get_var_info(file: &netcdf::File, var_name: &String) {
     let var_dimstr = format_dimensions(var_dims);
     let var_typestr = format_type(&var_dtype);
 
-    // let var_fstr = format_var_info(var_info);
+    let attr_str = format_attrs(&var.name(), var_attrs);
 
-    println!(
-        "\t{} {}({}) ;",
+    format!(
+        "\t{} {}({}) ;\n{}\n",
         var_typestr,
         var.name(),
-        var_dimstr
-    );
+        var_dimstr,
+        attr_str,
+    )
 
-    // let attr_str = format_attr(&var_attrs[0]);
-    // println!("{}\n", attr_str);
-
-    let attr_str = format_attrs(&var.name(), var_attrs);
-    println!("{}", attr_str);
 }
 
 fn format_dimensions(dims: &[netcdf::Dimension<'_>]) -> String {

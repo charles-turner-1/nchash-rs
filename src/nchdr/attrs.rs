@@ -1,7 +1,7 @@
 use netcdf::{self};
 use num::{self, Signed, ToPrimitive};
 
-pub fn get_attr_info(file: &netcdf::File, attr_name: &str) {
+pub fn fmt_attr_info(file: &netcdf::File, attr_name: &str) -> String{
     // Take reference to a file and a variable in it, and get all the attributes
     // and their values
 
@@ -10,7 +10,7 @@ pub fn get_attr_info(file: &netcdf::File, attr_name: &str) {
     // Nasty - get rid of unwrap if possible.
     let attr = attr_opt.unwrap();
 
-    println!("\t\t:{} = {} ;", attr.name(), format_attr(&attr),);
+    format!("\t\t:{} = {} ;\n", attr.name(), format_attr(&attr),)
 }
 
 pub fn format_attr(attr: &netcdf::Attribute) -> String {
