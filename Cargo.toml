@@ -9,4 +9,6 @@ name = "nchash_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
+netcdf = "0.10.5"
+num = "0.4.3"
 pyo3 = "0.23.3"

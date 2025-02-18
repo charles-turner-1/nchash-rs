@@ -1,3 +1,5 @@
+mod nchdr;
+
 use std::fs::metadata;
 use std::string;
 use std::fs;
@@ -99,12 +101,10 @@ impl NCDataHash {
         self.mtime = Some(mtime);
 
         Some(mtime)
-
-
-
     }
 
     fn getheader(&self) -> () {
+        // Call ncdump -h here (nchdr maybe?) 
 
     }
 
