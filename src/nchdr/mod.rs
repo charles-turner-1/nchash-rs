@@ -38,7 +38,7 @@ pub fn nchdr(fname: String) -> Result<String, Box<dyn Error>> {
         ncdump.push_str(&fmt_var_info(&file, &var.name()));
     }
 
-    ncdump.push_str(&format!("{}", "\n// global attributes:"));
+    ncdump.push_str(&format!("{}", "\n// global attributes:\n"));
     for attr in global_attrs {
         ncdump.push_str(&fmt_attr_info(&file, attr.name()));
     }
