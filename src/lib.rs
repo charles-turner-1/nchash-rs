@@ -1,8 +1,7 @@
 mod nchdr;
 
-use std::{fs::metadata, ptr::hash};
+use std;
 use std::os::unix::fs::MetadataExt;
-use std::string;
 use md5;
 use std::fs;
 use std::time::SystemTime;
