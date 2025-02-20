@@ -1,9 +1,12 @@
 mod nchdr;
 
-use std::fs::metadata;
+use std::{fs::metadata, ptr::hash};
+use std::os::unix::fs::MetadataExt;
 use std::string;
+use md5;
 use std::fs;
 use std::time::SystemTime;
+use regex::Regex;
 
 use crate::nchdr::nchdr;
 
@@ -68,7 +71,7 @@ impl NotNetcdfFileError{
 struct NCDataHash{
     filename : String,
     noname : bool,
-    nomtime : bool,
+    no_mtime : bool,
     // Not generated at initialisation 
     mtime : Option<f64>,
     ncdump: Option<String>,
@@ -85,7 +88,7 @@ impl NCDataHash {
         NCDataHash {
             filename,
             noname : noname.unwrap_or(false),
-            nomtime : nomtime.unwrap_or(false),
+            no_mtime : nomtime.unwrap_or(false),
             mtime: None,
             ncdump : None,
             hashstring: None,
@@ -105,23 +108,68 @@ impl NCDataHash {
         Some(mtime)
     }
 
-    fn getheader(&self) -> String {
+    fn getheader(&mut self) -> PyResult<String> {
         // Call ncdump -h here (nchdr maybe?) 
-        let header_str = nchdr(self.filename.clone()).unwrap();
-        // unwrap -- eugh
-        header_str
+        let mut header_str = match nchdr(self.filename.clone()) {
+            Ok(header_str) => header_str,
+            Err(e) => return Err(PyErr::new::<PyException, _>(e))
+        };
+
+        if self.noname {
+            let re = Regex::new(r"^netcdf.*\{\n").unwrap();
+            header_str = re.replace_all(&header_str, "{\n").to_string();
+
+        }
+        self.ncdump = Some(header_str.clone());
+
+        Ok(header_str)
 
     }
 
-    fn makehash(&self) -> () {
+    fn makehash(&mut self) -> PyResult<()> {
+
+        let mut hashstr = match std::fs::metadata(&self.filename) {
+            Ok(md) => md.size().to_string(),
+            Err(e) => return Err(PyErr::new::<PyException, _>(e))
+        };
+
+        let ncdump = match &self.ncdump {
+            Some(s) => s,
+            None => return Err(PyErr::new::<PyException,_>("mtime not found"))
+        };
+
+        if self.no_mtime {
+            hashstr.push_str(&ncdump);
+        } else {
+            hashstr.push_str(&self.mtime.unwrap().to_string());
+            hashstr.push_str(&ncdump);
+        }
+
+        let digest = md5::compute(hashstr);
+
+        self.hashstring = Some(format!("{:x}", digest));
+
+        Ok(())
 
     }
 
-    fn gethash(&self) -> () {
+    fn gethash(&mut self) -> PyResult<String> {
 
+        if !self.no_mtime {
+            self.getmtime();
+        }
+
+        let _ = self.getheader();
+        match self.makehash() {
+            Ok(()) => {
+                match &self.hashstring {
+                    Some(hashstring) => Ok(hashstring.clone()),
+                    None => Err(PyErr::new::<PyException,_>("Failed to generate hash"))
+                }
+            },
+            Err(_) => return Err(PyErr::new::<PyException,_>("Failed to generate hash"))
+        }
     }
-
-
 }
 
 

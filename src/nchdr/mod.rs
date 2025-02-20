@@ -11,16 +11,23 @@ use attrs::fmt_attr_info;
 use dims::fmt_dim_info;
 use vars::fmt_var_info;
 
-pub fn nchdr(fname: String) -> Result<String, Box<dyn Error>> {
+pub fn nchdr(fname: String) -> Result<String, String> {
     // Dynamically build back up the output of ncdump -h $fname
 
     let mut ncdump = String::new();
 
     let f_path = Path::new(fname.as_str());
 
-    let file: netcdf::File = netcdf::open(f_path)?;
+    let file: netcdf::File = match netcdf::open(f_path) {
+        Ok(file) => file,
+        Err(_) => return Err("NetCDF: Unknown file format".to_string()),
+    };
 
-    let file_stem = extract_fname(&f_path)?;
+    let file_stem = match extract_fname(&f_path) {
+        Ok(stem) => stem,
+        Err(_) => return Err("Could not decode filename".to_string()),
+    };
+
     ncdump.push_str(&fmt_skeleton_opening(&file_stem));
     
 

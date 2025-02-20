@@ -14,16 +14,17 @@ limitations under the License.
 
 from netCDF4 import Dataset
 import numpy as np
-from glob import glob
 import os
 import shutil
 
-formats = ['NETCDF3_CLASSIC', 'NETCDF3_64BIT_OFFSET', 'NETCDF4_CLASSIC']
+formats = ["NETCDF3_CLASSIC", "NETCDF3_64BIT_OFFSET", "NETCDF4_CLASSIC"]
 
-tmpdir = 'test/tmpfiles'
+tmpdir = "test/tmpfiles"
+
 
 def which(program):
     import os
+
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -40,55 +41,58 @@ def which(program):
 
     return None
 
+
 def make_tmpdir(verbose=True):
     if not os.path.exists(tmpdir):
         os.mkdir(tmpdir)
+
 
 def remove_ncfiles(verbose=True):
     if os.path.exists(tmpdir):
         shutil.rmtree(tmpdir)
 
+
 def touch(fname, times=None):
     # http://stackoverflow.com/a/1160227/4727812
-    with open(fname, 'a'):
+    with open(fname, "a"):
         os.utime(fname, times)
 
-def make_simple_netcdf_file(ncfiles):
 
+def make_simple_netcdf_file(ncfiles):
     # the output array to write will be nx x ny
-    ny = 600; nx = 120
+    ny = 600
+    nx = 1
 
     # create the output data.
-    data = np.reshape(np.arange(nx*ny)/100., (nx,ny))
+    data = np.reshape(np.arange(nx * ny) / 100.0, (nx, ny))
 
-    for i,form in enumerate(formats):
-
-        filename = ncfiles[0].replace('.nc', "_{}.nc".format(i))
+    for i, form in enumerate(formats):
+        filename = ncfiles[0].replace(".nc", "_{}.nc".format(i))
         make_file(filename, form, data)
 
-        filename = ncfiles[0].replace('.nc', "_{}.nc.notsamename".format(i))
+        filename = ncfiles[0].replace(".nc", "_{}.nc.notsamename".format(i))
         make_file(filename, form, data)
+
 
 def make_file(filename, form, data):
-
-    filename = os.path.join(tmpdir,filename)
+    filename = os.path.join(tmpdir, filename)
     print("Making {}".format(filename))
 
-    ncfile = Dataset(filename,'w',format=form) 
+    ncfile = Dataset(filename, "w", format=form)
     nx, ny = data.shape
 
     # create the x and y dimensions.
-    ncfile.createDimension('x',nx)
-    ncfile.createDimension('y',ny)
+    ncfile.createDimension("x", nx)
+    ncfile.createDimension("y", ny)
 
     # create the variable (4 byte integer in this case)
     # first argument is name of variable, second is datatype, third is
     # a tuple with the names of dimensions.
-    ncdata = ncfile.createVariable('data',np.dtype('float32').char,('y','x'))
-    ncdata.setncattr("Unhidden","test")
+    ncdata = ncfile.createVariable("data", np.dtype("float32").char, ("y", "x"))
+    ncdata.setncattr("Unhidden", "test")
     ncdata[:] = data
     ncfile.close()
 
-if __name__ == "__main__":
 
-    make_simple_netcdf_file(['simple_xy.nc'])
+if __name__ == "__main__":
+    make_simple_netcdf_file(["simple_xy.nc"])
