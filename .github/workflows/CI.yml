@@ -41,6 +41,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
+      - name: Install missing packages
+        run: sudo apt install -y libhdf5-serial-dev
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -72,6 +74,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
+      - name: Install missing packages
+        run: sudo apt install -y libhdf5-serial-dev
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -126,6 +130,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: 3.x
+      - name: Install missing packages
+        run: brew install hdf5@1.10
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:

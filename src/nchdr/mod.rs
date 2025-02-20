@@ -3,8 +3,6 @@ mod dims;
 mod vars;
 
 use netcdf::{self};
-use std::env;
-use std::error::Error;
 use std::path::Path;
 
 use attrs::fmt_attr_info;

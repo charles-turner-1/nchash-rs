@@ -75,8 +75,6 @@ struct NCDataHash{
     mtime : Option<f64>,
     ncdump: Option<String>,
     hashstring : Option<String>,
-    md5: Option<String>,
-    size: Option<u64>,
 }
 
 #[pymethods]
@@ -91,8 +89,6 @@ impl NCDataHash {
             mtime: None,
             ncdump : None,
             hashstring: None,
-            md5: None,
-            size: None,
         }
     }
 
